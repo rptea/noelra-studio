@@ -1,346 +1,194 @@
 "use client";
 
 import { useState } from "react";
+import { sampleMaterials } from "../data/sampleMaterials";
+import Link from "next/link";
 
-const initialRecords = [
+const fields = [
   {
-    id: 1,
-    fullName: "John Smith",
-    email: "john.smith@example.com",
-    phone: "(904) 555-1234",
-    city: "Jacksonville",
-    registrationDate: "2026-08-03",
-    status: "Confirmed",
+    key: "name",
+    label: "Material"
   },
   {
-    id: 2,
-    fullName: "Jane Doe",
-    email: "jane.doe@example.com",
-    phone: "9045555678",
-    city: "Jacksonville",
-    registrationDate: "2026-08-05",
-    status: "Confirmed",
+    key: "category",
+    label: "Category",
   },
   {
-    id: 3,
-    fullName: "Bruce Wayne",
-    email: "bruce.wayne@example.com",
-    phone: "(904) 555-9012",
-    city: "Jacksonville",
-    registrationDate: "08/07/2026",
-    status: "Pending",
+    key: "quantityOnHand",
+    label: "Quantity on hand",
   },
   {
-    id: 4,
-    fullName: "Clark Kent",
-    email: "clark.kent@example.com",
-    phone: "(904) 555-3456",
-    city: "St. Augustine",
-    registrationDate: "2026-08-09",
-    status: "Confirmed",
+    key: "unit",
+    label: "Unit",
   },
   {
-    id: 5,
-    fullName: "Natasha Romanoff",
-    email: "",
-    phone: "(904) 555-7890",
-    city: "Jacksonville",
-    registrationDate: "2026-08-10",
-    status: "Confirmed",
+    key: "purchaseCost", 
+    label: "Purchase cost",
   },
   {
-    id: 6,
-    fullName: "Matt Murdok",
-    email: "matt.murdock@example.com",
-    phone: "904.555.0234",
-    city: "JACKSONVILLE",
-    registrationDate: "2026-08-12",
-    status: "pending",
+    key: "supplier",
+    label: "Supplier",
   },
   {
-    id: 7,
-    fullName: "Anna Marie",
-    email: "anna.marie@example.com",
-    phone: "(904) 555-0567",
-    city: "Jacksonville",
-    registrationDate: "2026-13-14",
-    status: "Confirmed",
-  },
-  {
-    id: 8,
-    fullName: "James Howlett",
-    email: "matt.murdock@example.com",
-    phone: "(904) 555-0890",
-    city: "Jacksonville",
-    registrationDate: "2026-08-15",
-    status: "Confirmed",
-  },
-  {
-    id: 9,
-    fullName: "Peter Parker",
-    email: "peter.parker@example.com",
-    phone: "(904) 555-0123",
-    city: "Jacksonville",
-    registrationDate: "2026-08-18",
-    status: "Waitlisted",
-  },
-  {
-    id: 10,
-    fullName: "Carol Danvers",
-    email: "carol.danvers@example.com",
-    phone: "(904) 555-0456",
-    city: "St. Augustine",
-    registrationDate: "2026-08-20",
-    status: "Maybe",
-  },
+    key: "reorderPoint",
+    label: "Reorder point",
+  }
 ];
 
-const allowedCities = ["Jacksonville", "St. Augustine"];
-const allowedStatuses = ["Confirmed", "Pending", "Waitlisted"];
-
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function isValidPhone(phone) {
-  return /^\(\d{3}\) \d{3}-\d{4}$/.test(phone);
-}
-
-function isValidCity(city) {
-  return allowedCities.includes(city);
-}
-
-function isValidDate(date) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+function isLowStock(material) {
+  if (
+    material.quantityOnHand.trim() === "" ||
+    material.reorderPoint.trim() === ""
+  ) {
     return false;
   }
 
-  const [year, month, day] = date.split("-").map(Number);
-  const parsedDate = new Date(year, month - 1, day);
+  const quantity = Number(material.quantityOnHand);
+  const reorderPoint = Number(material.reorderPoint);
 
-  return(
-    parsedDate.getFullYear() === year &&
-    parsedDate.getMonth() === month - 1 &&
-    parsedDate.getDate() === day
+  return (
+    Number.isFinite(quantity) &&
+    Number.isFinite(reorderPoint) &&
+    quantity >= 0 &&
+    reorderPoint >= 0 &&
+    quantity <= reorderPoint
   );
 }
 
-function isValidStatus(status) {
-  return allowedStatuses.includes(status);
-}
+function checkMaterials(materials) {
+  const issues = [];
+  const lowStock = [];
 
-function getFieldIssues(records) {
-  const emailCounts = records.reduce((counts, record) => {
-    const normalizedEmail = record.email.trim().toLowerCase();
+  materials.forEach((material) => {
+    const label = material.name.trim() || `Material ${material.id}`;
+    const quantity = material.quantityOnHand.trim();
+    const cost = material.purchaseCost.trim();
+    const reorderPoint = material.reorderPoint.trim();
 
-    if (normalizedEmail) {
-      counts[normalizedEmail] = (counts[normalizedEmail] || 0) + 1;
+    if (!material.name.trim()) {
+      issues.push(`${label}: Material name is missing.`);
     }
 
-    return counts;
-  }, {});
-
-  return records.flatMap((record) => {
-    const issues = [];
-
-    if (!isValidEmail(record.email)) {
-      issues.push({
-        recordId: record.id,
-        field: "email",
-        message: `${record.fullName}: Add a valid email address.`,
-      });
-    } else if (emailCounts[record.email.trim().toLowerCase()] > 1) {
-      issues.push({
-        recordId: record.id,
-        field: "email",
-        message: `${record.fullName}: Use a unique email address.`,
-      });
+    if (!material.category.trim()) {
+      issues.push(`${label}: Category is missing.`);
     }
 
-    if (!isValidPhone(record.phone)) {
-      issues.push({
-        recordId: record.id,
-        field: "phone",
-        message: `${record.fullName}: Use the phone format (###) ###-####.`,
-      });
+    if (!material.unit.trim()) {
+      issues.push(`${label}: Unit is missing.`);
     }
 
-    if (!isValidCity(record.city)) {
-      issues.push({
-        recordId: record.id,
-        field: "city",
-        message: `${record.fullName}: Choose Jacksonville or St. Augustine.`,
-      });
+    if (!material.supplier.trim()) {
+      issues.push(`${label}: Supplier is missing.`);
     }
 
-    if (!isValidDate(record.registrationDate)) {
-      issues.push({
-        recordId: record.id,
-        field: "registrationDate",
-        message: `${record.fullName}: Use a valid date in YYYY-MM-DD format.`,
-      });
+    if (
+      quantity === "" ||
+      !Number.isFinite(Number(quantity)) ||
+      Number(quantity) < 0
+    ) {
+      issues.push(`${label}: Quantity must be zero or greater.`);
     }
 
-    if (!isValidStatus(record.status)) {
-      issues.push({
-        recordId: record.id,
-        field: "status",
-        message: `${record.fullName}: Choose Confirmed, Pending, or Waitlisted.`,
-      });
+    if (
+      cost === "" ||
+      !Number.isFinite(Number(reorderPoint)) ||
+      Number(reorderPoint) < 0
+    ) {
+      issues.push(`${label}: Reorder point must be zero or greater.`);
     }
 
-    return issues;
+    if (isLowStock(material)) {
+      lowStock.push(material);
+    }
   });
+
+  return { issues, lowStock };
 }
 
 export default function Home() {
-  const [records, setRecords] = useState(initialRecords);
-  const [results, setResults] = useState(null);
+  const [materials, setMaterials] = useState(sampleMaterials);
+  const [checkResults, setCheckResults] = useState(null);
 
   function handleChange(id, field, value) {
-    setRecords((currentRecords) =>
-      currentRecords.map((record) =>
-        record.id === id ? { ...record, [field]: value } : record,
+    setMaterials((currentMaterials) =>
+      currentMaterials.map((material) =>
+        material.id === id
+          ? { ...material, [field]: value }
+          : material,
       ),
     );
-  }
 
-  function handleCheckWork() {
-    const startingIssues = getFieldIssues(initialRecords);
-    const remainingIssues = getFieldIssues(records);
-
-    const startingIssueKeys = new Set(
-      startingIssues.map((issue) => `${issue.recordId}-${issue.field}`),
-    );
-
-    const remainingIssueKeys = new Set(
-      remainingIssues.map((issue) => `${issue.recordId}-${issue.field}`),
-    );
-
-    const correctFixes = [...startingIssueKeys].filter(
-      (issueKey) => !remainingIssueKeys.has(issueKey),
-    );
-
-    const missedIssues = remainingIssues.filter((issue) =>
-      startingIssueKeys.has(`${issue.recordId}-${issue.field}`),
-    );
-
-    const newIssues = remainingIssues.filter((issue) => 
-      !startingIssueKeys.has(`${issue.recordId}-${issue.field}`),
-    );
-
-    const score = Math.round(
-      (correctFixes.length / startingIssueKeys.size) * 100,
-    );
-
-    setResults({
-      correctFixes,
-      missedIssues,
-      newIssues,
-      score,
-      totalIssues: startingIssueKeys.size,
-    });
+    setCheckResults(null);
   }
 
   function handleReset() {
-    setRecords(initialRecords);
-    setResults(null);
+    setMaterials(sampleMaterials);
+
+    setCheckResults(null);
   }
 
   return (
     <main className="page-shell">
+      
+      <nav aria-label="Main navigation">
+        <Link href="/">Home</Link>{" | "}
+        <Link href="/materials">Materials</Link>{" | "}
+        <Link href="/inventory-check">Inventory Check</Link>
+      </nav>
+      
       <section className="app-header">
-        <p className="eyebrow">EntryReady</p>
-
-        <h1>Clean Up an Event Registration List</h1>
-
-        <p className="intro">
-          Review the fictional registration records below. Correct information that appears missing, invalid, duplicated, or inconsistently formatted. When you are finished, you will be able to check your work.
-        </p>
+        <p className="eyebrow">Noelra Studio</p>
+        <h1>Know what's in your studio.</h1>
+        <p className="intro">Review your sample materials and their quantities. This early prototype helps makers see what they have and which supplies may need reordering.</p>
       </section>
-      <section className="workspace-card" aria-labelledby="records-heading">
+
+      <section className="workspace-card" aria-labelledby="materials-heading">
         <div className="workspace-heading">
           <div>
-            <p className="section-label">Practice Exercise</p>
-            <h2 id="records-heading">Event Registrations</h2>
+            <p className="section-label">Materials</p>
+            <h2 id="materials-heading">Sample Inventory</h2>
           </div>
+          <p className="record-count">{materials.length} materials</p>
         </div>
 
         <div className="table-scroll">
           <table>
             <thead>
               <tr>
-                <th scope="col">Full name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Phone</th>
-                <th scope="col">City</th>
-                <th scope="col">Registration Date</th>
-                <th scope="col">Status</th>
+                {fields.map((field) => (
+                  <th scope="col" key={field.key}>
+                    {field.label}
+                  </th>
+                ))}
+                <th scope="col">Stock status</th>
               </tr>
             </thead>
-            
+
             <tbody>
-              {records.map((record) => (
-                <tr key={record.id}>
-                  <td>
-                    <input
-                      aria-label={`${record.fullName} full name`}
-                      value={record.fullName}
-                      onChange={(event) =>
-                        handleChange(record.id, "fullName", event.target.value)
-                      }
-                    />  
-                  </td>
-
-                  <td>
-                    <input
-                      aria-label={`${record.fullName} email`}
-                      type="email"
-                      value={record.email}
-                      onChange={(event) => 
-                        handleChange(record.id, "email", event.target.value)
-                      }
-                    />
-                  </td>
-
-                  <td>
-                    <input
-                      aria-label={`${record.fullName} phone`}
-                      value={record.phone}
-                      onChange={(event) =>
-                        handleChange(record.id, "phone", event.target.value)
-                      }
-                    />  
-                  </td>
-
-                  <td>
-                    <input
-                      aria-label={`${record.fullName} city`}
-                      value={record.city}
-                      onChange={(event) =>
-                        handleChange(record.id, "city", event.target.value)
-                      }
-                      />
-                  </td>
-
-                  <td>
-                    <input 
-                      aria-label={`${record.fullName} registration date`}
-                      value={record.registrationDate}
-                      onChange={(event) =>
-                        handleChange(record.id, "registrationDate", event.target.value)
-                      }
-                    />
-                  </td>
-
-                  <td>
-                    <input
-                      aria-label={`${record.fullName} attendance status`}
-                      value={record.status}
-                      onChange={(event) =>
-                        handleChange(record.id, "status", event.target.value)}
-                    />
-                  </td>
+              {materials.map((material) => (
+                <tr key={material.id}>
+                  {fields.map((field) => (
+                    <td key={field.key}>
+                      <input 
+                        aria-label={`${material.name || `Material${material.id}`} ${field.label}`}
+                        value={material[field.key]}
+                        inputMode={["quantityOnHand", "reorderPoint"].includes(field.key)
+                          ? "numeric"
+                          : field.key === "purchaseCost"
+                            ? "decimal"
+                            : "text"
+                        }
+                        onChange={(event) => 
+                          handleChange(
+                            material.id,
+                            field.key,
+                            event.target.value,
+                          )
+                        }
+                      />  
+                    </td>
+                  ))}
+                  <td>{isLowStock(material) ? "Low Stock" : "-"}</td>
                 </tr>
               ))}
             </tbody>
@@ -348,83 +196,55 @@ export default function Home() {
         </div>
 
         <div className="workspace-footer">
-          <p>Your changes are saved in this practice session.</p>
-
-          <button className="primary-button" type="button" onClick={handleCheckWork}>
-            Check my work
-          </button>
+          <p>Changes are temporary in this prototype.</p>
+          <button
+            className="seconday-button"
+            type="button"
+            onClick={handleReset}>
+              Reset sample inventory
+            </button>
+            <button
+              type="button"
+              onClick={() => setCheckResults(checkMaterials(materials))}>
+                Run Inventory Check
+              </button>
         </div>
       </section>
 
-      {results && (
-        <section className="results-card" aria-live="polite">
-          <div className="results-heading">
-            <div>
-              <p className="section-label">Exercise Results</p>
-              <h2>{results.score}% complete</h2>
-            </div>
+      <section className="results-card" aria-labelledby="check-heading">
+        <p className="section-label">Inventory Check</p>
+        <h2 id="check-heading">Check Results</h2>
 
-            <p className="score-summary">
-              You corrected {results.correctFixes.length} of{" "} {results.totalIssues} issues.
-            </p>
-          </div>
+        {checkResults === null ? (
+          <p>Run Inventory Check to find missing information ad low-stock materials.</p>
+        ) : (
+          <>
+            <h3>Needs attention ({checkResults.issues.length})</h3>
+            {checkResults.issues.length > 0 ? (
+              <ul>
+                {checkResults.issues.map((issue, index) => (
+                  <li key={index}>{issue}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No missing or invalid information found.</p>
+            )}
 
-          <div className="results-grid">
-            <div className="result-group">
-              <h3>Correctly fixed</h3>
-
-              {results.correctFixes.length > 0 ? (
-                <p>Great work! You corrected {results.correctFixes.length} {""}
-                  issue{results.correctFixes.length === 1 ? "" : "s"}.
-                </p>
-              ) : (
-                <p>No original issues were corrected yet.</p>
-              )}
-            </div>
-
-            <div className="result-group">
-              <h3>Still needs attention</h3>
-
-              {results.missedIssues.length > 0 ? (
-                <ul>
-                  {results.missedIssues.map((issue) => (
-                    <li key={`${issue.recordId}-${issue.field}`}>
-                      {issue.message}
-                    </li>
-                  ))}
-                </ul> 
-              ) : (
-                <p>All original issues were corrected.</p>
-              )}  
-            </div>  
-
-            <div className="result-group">
-              <h3>New issues created</h3>
-              
-              {results.newIssues.length > 0 ? (
-                <ul>
-                  {results.newIssues.map((issue) => (
-                    <li key={`${issue.recordId}-${issue.field}`}>
-                      {issue.message}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>You did not create any new invalid entries</p>
-              )}
-            </div>
-          </div>
-
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={handleReset}
-          >
-            Reset Exercise
-          </button>
-        </section>
-      )}
-
-    </main>
+            <h3>Low stock ({checkResults.lowStock.length})</h3>
+            {checkResults.lowStock.length > 0 ? (
+              <ul>
+                {checkResults.lowStock.map((material) => (
+                  <li key={material.id}>
+                    {material.name}: {material.quantityOnHand} {material.unit} on hand; reorder point {material.reorderPoint}.
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No materials are at or below their reorder points.</p>
+            )}
+          </>
+        )}
+      </section>
+    </main> 
   );
-}
+}  
