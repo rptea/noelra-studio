@@ -99,6 +99,7 @@ h2 {
 }
 
 .workspace-footer {
+  flex-wrap: wrap;
   border-top: 1px solid var(--border);
   background: var(--surface-muted);
 }
@@ -114,7 +115,14 @@ h2 {
 }
 
 .table-scroll {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+}
+
+.table-scroll:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: -3px;
 }
 
 table {
@@ -174,24 +182,6 @@ input:focus {
 .primary-button:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
-}
-
-@media (max-width: 640px) {
-  .page-shell {
-    width: min(100% - 24px, 1440px);
-    padding: 32px 0;
-  }
-
-  .workspace-heading,
-  .workspace-footer {
-    align-items: flex-start;
-    flex-direction: column;
-    padding: 20px;
-  }
-
-  .primary-button {
-    width: 100%;
-  }
 }
 
 .results-card {
@@ -265,6 +255,22 @@ input:focus {
   outline-offset: 3px;
 }
 
+.check-details details {
+  padding: 1rem 0;
+  border-top: 1px solid #808080;
+}
+
+.check-details summary {
+  cursor: pointer;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.check-details li {
+  margin-bottom: 1rem;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 760px) {
   .results-heading {
     align-items: flex-start;
@@ -279,4 +285,22 @@ input:focus {
     grid-template-columns: 1fr;
   }
 
+}
+
+@media (max-width: 640px) {
+  .page-shell {
+    width: min(100% - 24px, 1440px);
+    padding: 32px 0;
+  }
+
+  .workspace-heading,
+  .workspace-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .workspace-footer button {
+    width: 100%;
+  }
 }

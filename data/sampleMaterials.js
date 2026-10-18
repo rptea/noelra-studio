@@ -14,7 +14,7 @@ export const sampleMaterials = [
         name: "Gold wire",
         category: "Wire",
         quantityOnHand: "4",
-        unit: "Spool",
+        unit: "roll-ish",
         purchaseCost: "8.50",
         supplier: "Sample Supply Shop",
         reorderPoint: "5",
@@ -42,8 +42,8 @@ export const sampleMaterials = [
     {
         id: 5,
         name: "Jump rings",
-        category: "Findings",
-        quantityOnHand: "100",
+        category: "Finding",
+        quantityOnHand: "-3",
         unit: "pieces",
         purchaseCost: "4.50",
         supplier: "Sample Supply Shop",
@@ -59,4 +59,14 @@ export const sampleMaterials = [
         supplier: "Fictional Bead Co.",
         reorderPoint: "10",
     },
+    {
+        id: 7,
+        name: "Rose quartz beads",
+        category: "Beads",
+        quantityOnHand: "20",
+        unit: "pieces",
+        purchaseCost: "5.00",
+        supplier: "Sample Supply Shop",
+        reorderPoint: "10",
+    }
 ];
