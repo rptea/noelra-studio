@@ -739,6 +739,19 @@ input:focus {
   .site-navigation a {
     padding-inline: 12px;
   }
+
+  .setup-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-flow: row;
+    gap: 24px;
+  }
+
+  .setup-grid > .setup-card {
+    grid-column: auto;
+    grid-row: auto;
+    min-width: 0;
+  }
   
   .results-heading {
     align-items: flex-start;
