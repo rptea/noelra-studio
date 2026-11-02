@@ -7,15 +7,14 @@ export default function InventoryCheckPage() {
   const { checkResults } = useInventory();
 
   return (
-    <main className="page-shell">
-      <nav aria-label="Main navigation">
-        <Link href="/">Inventory Setup</Link>{" | "}
-        <Link href="/materials">Materials</Link>{" | "}
-        <Link href="/inventory-check">Inventory Check</Link>
-      </nav>
+    <main
+      id="main-content"
+      className="page-shell"
+      tabIndex={-1}   
+    >
 
       <section
-        className="results-card"
+        className="results-card inventory-results"
         aria-labelledby="check-heading"
       >
         <h1 id="check-heading">Inventory Check</h1>
@@ -28,19 +27,22 @@ export default function InventoryCheckPage() {
             </p>
 
             <p>
-              <Link href="/materials">
+              <Link 
+                href="/materials"
+                className="primary-button"
+              >
                 Review materials
               </Link>
             </p>
           </>
         ) : (
           <>
-            <h2>
+            <h2 className="readiness-heading">
               {checkResults.readyCount} of{" "}
               {checkResults.totalMaterials} material records ready
             </h2>
 
-            <p>
+            <p className="readiness-message">
               {checkResults.issues.length === 0
                 ? "Your material records are ready for the next step."
                 : `${checkResults.issues.length} ${
@@ -51,7 +53,10 @@ export default function InventoryCheckPage() {
             </p>
 
             <p>
-              <Link href="/materials">
+              <Link 
+                href="/materials"
+                className="primary-button"
+              >
                 {checkResults.issues.length === 0
                   ? "Return to materials"
                   : "Review materials"}

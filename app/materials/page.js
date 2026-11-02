@@ -3,7 +3,6 @@
 import { sampleMaterials } from "../../data/sampleMaterials";
 import { useInventory } from "../context/InventoryContext";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 const fields = [
   {
@@ -253,22 +252,34 @@ export default function MaterialsPage() {
   }
 
   return (
-    <main className="page-shell">
+    <main 
+      id="main-content"
+      className="page-shell"
+      tabIndex={-1}   
+    >
       
-      <nav aria-label="Main navigation">
-        <Link href="/">Inventory Setup</Link>{" | "}
-        <Link href="/materials">Materials</Link>{" | "}
-        <Link href="/inventory-check">Inventory Check</Link>
-      </nav>
-      
-      <section className="app-header">
-        <p className="eyebrow">Noelra Studio</p>
-        <h1>Know what's in your studio.</h1>
-        <p className="intro">Review your sample materials and their quantities. This early prototype helps makers see what they have and which supplies may need reordering.</p>
+      <section 
+        className="app-header"
+        aria-labelledby="materials-page-heading"
+      >
+        <p className="eyebrow section-kicker">Noelra Studio</p>
+
+        <h1 id="materials-page-heading">
+          Know what's in your studio.
+        </h1>
+
+        <p className="intro">
+          Update the sample records, then run Inventory Check to see what's ready and what needs attention.
+        </p>
       </section>
 
-      <section className="workspace-card" aria-labelledby="materials-heading">
-        <div className="workspace-heading">
+      <section 
+        className="workspace-card" 
+        aria-labelledby="materials-heading"
+      >
+        <div 
+          className="workspace-heading"
+        >
           <div>
             <p className="section-label">Materials</p>
             <h2 id="materials-heading">Sample Inventory</h2>
@@ -284,7 +295,7 @@ export default function MaterialsPage() {
           aria-label="Editable material inventory"
           tabIndex={0}
         >
-          <table>
+          <table className="materials-table">
             <thead>
               <tr>
                 {fields.map((field) => (
@@ -302,6 +313,7 @@ export default function MaterialsPage() {
                   {fields.map((field) => (
                     <td key={field.key}>
                       <input 
+                        className={`material-input material-input--${field.key}`}
                         aria-label={`${material.name || `Material${material.id}`} ${field.label}`}
                         value={material[field.key]}
                         inputMode={["quantityOnHand", "reorderPoint"].includes(field.key)
@@ -320,7 +332,17 @@ export default function MaterialsPage() {
                       />  
                     </td>
                   ))}
-                  <td>{isLowStock(material) ? "Low Stock" : "-"}</td>
+                  <td className="stock-staus-cell">
+                    {isLowStock(material) ? (
+                      <span className="stock-badge">
+                        Low Stock
+                      </span>
+                    ) : (
+                      <span className="stock-status-empty">
+                        -
+                      </span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -332,14 +354,18 @@ export default function MaterialsPage() {
           <button
             className="secondary-button"
             type="button"
-            onClick={handleReset}>
+            onClick={handleReset}
+          >
               Reset sample inventory
-            </button>
-            <button
-              type="button"
-              onClick={handleRunCheck}>
-                Run Inventory Check
-              </button>
+          </button>
+
+          <button
+            className="primary-button"
+            type="button"
+            onClick={handleRunCheck}
+          >
+              Run Inventory Check
+          </button>
         </div>
       </section>
     </main> 

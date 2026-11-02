@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { InventoryProvider } from "./context/InventoryContext";
+import SiteHeader from "./components/SiteHeader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,9 +20,24 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html 
+      lang="en" 
+      className={`${geistSans.variable} ${geistMono.variable}`}
+    > 
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://use/typekit.net/oya2wnr.css"
+        />
+      </head>
+      
       <body>
+        <a className="skip-link" href="#main-content">
+          Skip to main content
+        </a>
+        
         <InventoryProvider>
+          <SiteHeader />
           {children}
         </InventoryProvider>
       </body>
