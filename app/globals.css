@@ -725,7 +725,7 @@ input:focus {
   font-size: clamp(2rem, 4vw, 3rem);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .site-header-inner {
     align-items: flex-start;
     flex-direction: column;
